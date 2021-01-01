@@ -1,6 +1,9 @@
-import { AppBar, Button, Drawer, IconButton, makeStyles, Typography } from '@material-ui/core'
+import { AppBar, Button, IconButton, makeStyles, Typography } from '@material-ui/core'
 import { Menu } from '@material-ui/icons'
-import React, { useState } from 'react'
+import { connect } from 'react-redux'
+import { changePage } from '../redux/actions'
+import { toggleOpenDrawer } from '../redux/actions/drawer'
+import SideDrawer from './SideDrawer'
 
 const useStyles = makeStyles({
   header: {
@@ -16,17 +19,31 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center'
   },
-  drawer: {
-    width: 250
+  link: {
+    color: 'inherit'
+  },
+  active: {
+    color: 'inherit',
+    fontWeight: 'bold'
   }
 })
 
-export default function Header() {
-  const classes = useStyles()
-  const [drawerIsOpen, setDrawerIsOpen] = useState(false)
+const pages = [
+  { page: 'home', name: 'Home' },
+  { page: 'settings', name: 'Settings' }
+]
 
-  const toggleDrawer = () => {
-    setDrawerIsOpen(p => !p)
+function Header({
+  page,
+  drawerState,
+  goTo,
+  toggleDrawer
+}) {
+  const classes = useStyles()
+
+  const toPage = (e, page) => {
+    e.preventDefault()
+    goTo(page)
   }
 
   return (
@@ -34,21 +51,45 @@ export default function Header() {
       <AppBar variant='dense'>
         <div className={classes.header}>
           <div className={classes.leftSide}>
-            <IconButton onClick={toggleDrawer}>
+            <IconButton
+              style={{ color: 'white' }}
+              onClick={e => {
+                e.preventDefault()
+                toggleDrawer(!drawerState)
+              }}
+            >
               <Menu />
             </IconButton>
             <Typography>Logo</Typography>
           </div>
           <div className={classes.rightSide}>
-            <Button color='inherit'>Home</Button>
-            <Button color='inherit'>About</Button>
-            <Button color='inherit'>Contact Us</Button>
+            {
+              pages.map(p => (
+                <Button
+                  key={p.page}
+                  className={page === p.page ? classes.active : classes.link}
+                  onClick={e => toPage(e, p.page)}
+                >
+                  { p.name }
+                </Button>
+              ))
+            }
           </div>
         </div>
       </AppBar>
-      <Drawer anchor='left' open={drawerIsOpen} onClose={toggleDrawer}>
-        <div className={classes.drawer}></div>
-      </Drawer>
+      <SideDrawer/>
     </>
   )
 }
+
+export default connect(
+  ({ page, drawer }) => ({ page, drawerState: drawer }),
+  dispatch => ({
+    goTo(page) {
+      dispatch(changePage(page))
+    },
+    toggleDrawer(drawerState) {
+      dispatch(toggleOpenDrawer(drawerState))
+    }
+  })
+)(Header)

@@ -1,11 +1,22 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './components/App';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import './index.css'
+import App from './components/App'
+import { pageReducer, drawerReducer, settingsReducer } from './redux/reducers'
+import { Provider } from 'react-redux'
+import { combineReducers, createStore } from 'redux'
+
+const store = createStore(
+  combineReducers({
+    page: pageReducer,
+    drawer: drawerReducer,
+    settings: settingsReducer
+  })
+)
 
 ReactDOM.render(
-  <React.StrictMode>
+  <Provider store={store}>
     <App />
-  </React.StrictMode>,
+  </Provider>,
   document.getElementById('root')
-)
+)   
